@@ -30,7 +30,6 @@
             transform: translateY(-4px);
             box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.15);
         }
-        /* Custom drag & drop animations */
         .drop-zone-active {
             border-color: #6366f1 !important;
             background-color: #eef2ff !important;
@@ -47,14 +46,13 @@
         .draggable-badge {
             cursor: grab;
             user-select: none;
-            touch-action: none;
+            touch-action: manipulation;
             transition: all 0.15s ease;
         }
         .draggable-badge:active {
             cursor: grabbing;
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -69,6 +67,11 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+        .bg-checkerboard {
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
         }
     </style>
 </head>
@@ -95,7 +98,7 @@
                 </button>
                 <button onclick="openQuizModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-xs sm:text-sm shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-hand-pointer"></i>
-                    <span>拖曳隨堂測驗</span>
+                    <span>隨堂小測驗</span>
                 </button>
             </div>
         </div>
@@ -113,7 +116,6 @@
                         <span class="flex items-center gap-2.5"><i class="fa-solid fa-border-all w-4"></i> 全部檔案</span>
                         <span class="bg-indigo-200 text-indigo-800 text-xs px-2 py-0.5 rounded-full font-bold" id="count-all">0</span>
                     </button>
-                    <!-- Spreadsheet now classified under document/office category -->
                     <button onclick="setCategory('document')" data-cat="document" class="cat-btn w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50">
                         <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-word text-blue-500 w-4"></i> 文書、簡報與試算表</span>
                         <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full" id="count-document">0</span>
@@ -147,7 +149,7 @@
                     <i class="fa-solid fa-lightbulb text-yellow-300"></i> 什麼是副檔名？
                 </div>
                 <p class="text-xs text-indigo-100 leading-relaxed">
-                    主檔名後面的點（例如 <code>.html</code> 或 <code>.pdf</code>）稱為<b>副檔名</b>。作業系統會依據它來識別檔案格式，並開啟對應軟體！
+                    主檔名點（.）後面的英文字（如 <code>.html</code> 或 <code>.pdf</code>）稱為<b>副檔名</b>。作業系統會依據它來識別檔案格式並開啟對應軟體！
                 </p>
             </div>
         </aside>
@@ -218,7 +220,7 @@
                         <div class="text-xs space-y-1.5 text-slate-600">
                             <div class="flex justify-between"><span>副檔名：</span><strong id="modalExtText" class="font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded text-xs">.txt</strong></div>
                             <div class="flex justify-between"><span>檔案類型：</span><span id="modalCategoryText" class="font-medium text-slate-800">純文字檔</span></div>
-                            <div class="flex justify-between"><span>預估大小：</span><span id="modalSizeText">12 KB</span></div>
+                            <div class="flex justify-between"><span>路徑：</span><span id="modalFilePathText" class="font-mono text-slate-500 truncate max-w-[120px]">data/...</span></div>
                         </div>
                     </div>
 
@@ -237,7 +239,10 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-between items-center">
+                <a id="modalDownloadBtn" href="#" download target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> 開啟 / 下載資料夾中的實體檔案
+                </a>
                 <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-700 text-xs font-semibold rounded-lg shadow-sm transition">
                     關閉預覽
                 </button>
@@ -274,14 +279,7 @@
                         ondragleave="handleDragLeave(event)" 
                         ondrop="handleDrop(event)"
                         class="border-2 border-dashed border-slate-300 bg-slate-50 p-5 rounded-2xl text-center space-y-3 transition-all duration-200 min-h-[160px] flex flex-col justify-center items-center shadow-inner relative">
-                        
-                        <div id="quizQuestionBody" class="space-y-2 text-center w-full">
-                            <!-- Target question content rendered dynamically -->
-                        </div>
-                        
-                        <div id="dropPrompt" class="text-xs text-indigo-500 font-semibold bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-200 animate-pulse mt-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-down"></i> 將下方正確的副檔名拖曳至此處
-                        </div>
+                        <!-- Questions injected dynamically -->
                     </div>
 
                     <!-- Draggable Options Pool -->
@@ -309,289 +307,296 @@
     </div>
 
     <script>
-        /**
-         * 完整檔案資料庫定義 File Database Definition (包含新增的 .html, .css 並且 .ods, .csv 已移至 document)
-         */
+        // Central Files Dataset
         const filesData = [
-            // 文書、簡報與試算表 (document)
             {
-                id: 'txt-1',
-                name: '會議記錄',
-                ext: '.txt',
-                category: 'document',
-                size: '8.4 KB',
-                icon: 'fa-file-lines',
-                color: 'text-blue-500',
-                previewType: 'text',
-                content: `===== 2026 數位學習研討會會議記錄 =====\n日期：2026年9月24日\n記錄人：張小明\n\n[討論事項]\n1. 推廣資訊教育副檔名辨識課程。\n2. 熟練各種影音、圖片、試算表與網頁副檔名。\n3. 下週進行隨堂拖曳隨機測驗。`,
-                software: 'Windows 記事本, Mac TextEdit, VS Code',
-                description: '純文字檔案（Plain Text），不包含字體格式或圖片，佔用空間極小，相容性極高。'
-            },
-            {
-                id: 'doc-1',
-                name: '校慶活動企劃',
+                id: 'file-1',
+                name: '開會通知單',
                 ext: '.docx',
                 category: 'document',
-                size: '1.2 MB',
                 icon: 'fa-file-word',
                 color: 'text-blue-600',
+                size: '24.5 KB',
+                filePath: 'data/開會通知單.docx',
+                software: 'Microsoft Word, LibreOffice Writer, Google 文件',
+                description: '常見的文書處理軟體格式，主要用於撰寫報告、信件與文章排版。',
                 previewType: 'doc_preview',
                 content: {
-                    title: '🎓 2026 學校年度校慶企劃案',
-                    subtitle: '主辦單位：訓育組 | 文件編號: 7xxXX',
-                    body: '一、活動宗旨：提升全校師生資訊素養與體能發展。\n二、活動時間：今年11月15日上午9:00點。\n三、預期目標：全校師生參與率達95%以上。'
-                },
-                software: 'Microsoft Word, LibreOffice Writer, Google 文件',
-                description: 'Word 開放 XML 文件格式，適用於編輯排版豐富的報告、文章與公文。'
+                    title: '2026 年度資訊軟體教學研討會 通知',
+                    subtitle: '發文字號：教字第 1050924 號',
+                    body: '主旨：檢送「資訊課程副檔名教學應用」研討會實施計畫乙份，請查照。\n說明：\n一、為提升學生對常見檔案格式之辨識能力，特辦理本研討會。\n二、時間：2026年10月15日(四) 上午 09:00~12:00。\n三、地點：本校第一電腦教室。'
+                }
             },
             {
-                id: 'pptx-1',
-                name: '資訊課展示簡報',
+                id: 'file-2',
+                name: '簡報發表檔',
                 ext: '.pptx',
                 category: 'document',
-                size: '5.8 MB',
                 icon: 'fa-file-powerpoint',
-                color: 'text-orange-600',
+                color: 'text-orange-500',
+                size: '1.8 MB',
+                filePath: 'data/簡報發表檔.pptx',
+                software: 'Microsoft PowerPoint, Google 簡報, Keynote',
+                description: '簡報簡報專用格式，可包含動態文字、圖片、表格與投影片切換效果。',
                 previewType: 'pptx_preview',
                 slides: [
-                    { title: '資訊課簡報：檔案副檔名大解密', subtitle: '報告人：資訊股長', bg: 'from-amber-500 to-orange-600' },
-                    { title: '為什麼需要副檔名？', subtitle: '讓作業系統知道該用什麼軟體開啟檔案！', bg: 'from-indigo-600 to-blue-700' },
-                    { title: '常見簡報與網頁格式', subtitle: '.pptx 簡報與 .html 網頁檔都是現代電腦必學知識', bg: 'from-emerald-600 to-teal-700' }
-                ],
-                software: 'Microsoft PowerPoint, Google 簡報, Keynote',
-                description: '簡報檔（PowerPoint Presentation），包含投影片、動畫、圖表與演講備忘錄。'
+                    { title: '副檔名辨識與應用', subtitle: '報告人：資訊老師', bg: 'from-indigo-600 to-blue-700' },
+                    { title: '什麼是副檔名？', subtitle: '副檔名是主檔名點(.)後面的英文字，代表檔案格式。', bg: 'from-emerald-600 to-teal-700' },
+                    { title: '常見分類', subtitle: '文書、圖片、影音、程式碼與壓縮檔', bg: 'from-purple-600 to-pink-700' }
+                ]
             },
             {
-                id: 'pdf-1',
-                name: '班級課表簡章',
-                ext: '.pdf',
-                category: 'document',
-                size: '450 KB',
-                icon: 'fa-file-pdf',
-                color: 'text-rose-600',
-                previewType: 'pdf_preview',
-                content: {
-                    title: '115 學年度第一學期 課程總表',
-                    status: '[PDF 已鎖定跨平台格式]',
-                    pageCount: '頁數: 1 / 3'
-                },
-                software: 'Adobe Acrobat Reader, Chrome/Edge 瀏覽器',
-                description: '可攜式文件格式（Portable Document Format），跨裝置顯示效果完全相同，發布正式公告的首選。'
-            },
-            {
-                id: 'ods-1',
-                name: '產品銷售統計表',
+                id: 'file-3',
+                name: '班級成績單',
                 ext: '.ods',
                 category: 'document',
-                size: '28 KB',
                 icon: 'fa-file-excel',
                 color: 'text-emerald-600',
+                size: '15.2 KB',
+                filePath: 'data/班級成績單.ods',
+                software: 'LibreOffice Calc, OpenOffice, Microsoft Excel',
+                description: 'ODF 開放文件格式的試算表檔，用於計算數據、製作統計圖表與分析數據。',
                 previewType: 'ods_preview',
                 content: [
-                    ['項目', '第一季銷量', '第二季銷量', '成長率'],
-                    ['筆記型電腦', '1,200台', '1,450台', '+20.8%'],
-                    ['平板電腦', '850台', '920台', '+8.2%'],
-                    ['智慧手錶', '2,100台', '3,100台', '+47.6%']
-                ],
-                software: 'LibreOffice Calc, OpenOffice, Microsoft Excel',
-                description: 'OpenDocument 試算表格式，為開放標準辦公文件（ODF）的表格檔案，廣泛用於政府與開源軟體。'
+                    ['座號', '姓名', '國文', '英文', '資訊', '總分'],
+                    ['01', '張小明', '88', '92', '95', '275'],
+                    ['02', '李小華', '90', '85', '98', '273'],
+                    ['03', '王大同', '76', '80', '90', '246']
+                ]
             },
             {
-                id: 'csv-1',
-                name: '學生成績統計表',
+                id: 'file-4',
+                name: '學生通訊錄',
                 ext: '.csv',
                 category: 'document',
-                size: '15 KB',
                 icon: 'fa-file-csv',
                 color: 'text-teal-600',
-                previewType: 'csv_table',
-                content: [
-                    ['學號', '姓名', '資訊成績', '數學成績', '總評'],
-                    ['10101', '王小明', '95', '88', '優等'],
-                    ['10102', '李美玲', '92', '90', '優等'],
-                    ['10103', '張大衛', '78', '82', '甲等']
-                ],
-                software: 'Microsoft Excel, Google 試算表, 記事本',
-                description: '逗號分隔值（Comma-Separated Values），純文字儲存的表格數據，極利於跨系統匯入與試算。'
+                size: '4.1 KB',
+                filePath: 'data/學生通訊錄.csv',
+                software: 'Excel, 記事本, Google 試算表',
+                description: '逗點分隔值純文字表格檔，跨平台相容性高，常用於資料匯入匯出。',
+                previewType: 'csv_preview',
+                csvRows: [
+                    ['學號', '姓名', '電子郵件', '聯絡電話'],
+                    ['11101', '陳志豪', 'zhihao@example.com', '0912-345-678'],
+                    ['11102', '林雅婷', 'yating@example.com', '0923-456-789'],
+                    ['11103', '黃柏翰', 'bohan@example.com', '0934-567-890']
+                ]
             },
-
-            // 圖片與動畫 (image)
             {
-                id: 'jpg-1',
-                name: '風景寫真',
+                id: 'file-5',
+                name: '課程學習手冊',
+                ext: '.pdf',
+                category: 'document',
+                icon: 'fa-file-pdf',
+                color: 'text-red-500',
+                size: '520 KB',
+                filePath: 'data/課程學習手冊.pdf',
+                software: 'Adobe Acrobat Reader, Chrome, Edge',
+                description: '可攜式文件格式，確保跨平台開啟時排版與字型完全一致。',
+                previewType: 'pdf_preview',
+                content: {
+                    title: '電腦基礎教學手冊 (PDF 格式預覽)',
+                    pages: '共 12 頁 | 版面鎖定',
+                    text: '本手冊旨在引導初學者認識電腦基礎作業環境，包含檔案管理、副檔名認識與網路安全常識。PDF 格式能完整保留文字與圖表排版。'
+                }
+            },
+            {
+                id: 'file-6',
+                name: '閱讀筆記',
+                ext: '.txt',
+                category: 'document',
+                icon: 'fa-file-lines',
+                color: 'text-slate-600',
+                size: '1.2 KB',
+                filePath: 'data/閱讀筆記.txt',
+                software: 'Windows 記事本, TextEdit, VS Code',
+                description: '無格式純文字檔，幾乎所有作業系統與文字編輯器都能開啟。',
+                previewType: 'txt_preview',
+                text: '今日學習重點：\n1. 副檔名決定作業系統用何種預設程式開啟檔案。\n2. 更改副檔名不會改變檔案本身內容，但可能導致軟體無法讀取。\n3. 可在「檔案總管」設定中開啟「顯示副檔名」。'
+            },
+            {
+                id: 'file-7',
+                name: '美麗風景照',
                 ext: '.jpg',
                 category: 'image',
-                size: '3.4 MB',
-                icon: 'fa-file-image',
-                color: 'text-red-500',
-                previewType: 'image_jpg',
-                software: 'Windows 相片, Photoshop, 各類瀏覽器',
-                description: '全名 JPEG，為破壞性壓縮影像格式，色彩豐富且壓縮率高，是數位相機與照片標準格式。'
-            },
-            {
-                id: 'png-1',
-                name: '標誌圖檔',
-                ext: '.png',
-                category: 'image',
-                size: '820 KB',
                 icon: 'fa-file-image',
                 color: 'text-amber-500',
-                previewType: 'image_png',
-                software: 'Photoshop, Illustrator, 各類瀏覽器',
-                description: '無損壓縮影像格式，支援「透明背景 (Alpha 通道)」，廣泛應用於網頁圖示與 Logo 設計。'
+                size: '1.2 MB',
+                filePath: 'data/美麗風景照.jpg',
+                software: '相片檢視器, Photoshop, Chrome',
+                description: '最常見的壓縮圖檔格式，適合高解析度色彩豐富的照片。',
+                previewType: 'jpg_preview'
             },
             {
-                id: 'gif-1',
-                name: '動態貓咪梗圖',
+                id: 'file-8',
+                name: '網站標誌圖案',
+                ext: '.png',
+                category: 'image',
+                icon: 'fa-file-image',
+                color: 'text-emerald-500',
+                size: '85 KB',
+                filePath: 'data/網站標誌圖案.png',
+                software: 'Photoshop, Illustrator, Paint.NET',
+                description: '支援無損壓縮與 Alpha 透明背景，常用於網頁 Icon 與標誌。',
+                previewType: 'png_preview'
+            },
+            {
+                id: 'file-9',
+                name: '跳舞貓咪動圖',
                 ext: '.gif',
                 category: 'image',
-                size: '1.5 MB',
                 icon: 'fa-file-image',
-                color: 'text-purple-500',
-                previewType: 'image_gif',
-                software: '瀏覽器, 相片檢視器, GIMP',
-                description: '動態圖檔格式（Graphics Interchange Format），最多支援 256 色，適合簡單循環動畫與梗圖。'
+                color: 'text-pink-500',
+                size: '320 KB',
+                filePath: 'data/跳舞貓咪動圖.gif',
+                software: '瀏覽器, 相片檢視器',
+                description: '圖像交換格式，支援簡單連續幀動圖與透明效果（256色上限）。',
+                previewType: 'gif_preview'
             },
-
-            // 音訊與 MIDI (audio)
             {
-                id: 'mp3-1',
-                name: '鋼琴樂曲範例',
+                id: 'file-10',
+                name: '鋼琴背景音樂',
                 ext: '.mp3',
                 category: 'audio',
-                size: '3.8 MB',
                 icon: 'fa-file-audio',
                 color: 'text-sky-500',
-                previewType: 'audio_mp3',
-                freqs: [440, 554.37, 659.25],
-                software: 'Windows Media Player, VLC, Apple Music, Spotify',
-                description: '最流行的破壞性聲音壓縮格式（MPEG Layer-3），相容性高，適合音樂與 Podcast。'
+                size: '3.4 MB',
+                filePath: 'data/鋼琴背景音樂.mp3',
+                software: 'Windows Media Player, Spotify, VLC',
+                description: '高壓縮比動態音樂格式，廣泛應用於數位音樂與播客收聽。',
+                previewType: 'mp3_preview',
+                freqs: [261.63, 329.63, 392.00, 523.25]
             },
             {
-                id: 'mid-1',
-                name: '樂器音軌指令檔',
+                id: 'file-11',
+                name: '經典樂曲軌道',
                 ext: '.mid',
                 category: 'audio',
-                size: '45 KB',
-                icon: 'fa-file-audio',
-                color: 'text-emerald-600',
-                previewType: 'audio_midi',
-                melody: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
-                software: 'Synthesia, GarageBand, Windows Media Player',
-                description: '樂器數位介面（MIDI），不含真實聲波，而是紀錄「音符音高與節奏」的數位樂譜指令。'
+                icon: 'fa-sliders',
+                color: 'text-purple-500',
+                size: '12 KB',
+                filePath: 'data/經典樂曲軌道.mid',
+                software: 'GarageBand, MuseScore, Synthesia',
+                description: '樂器數位介面檔，紀錄樂器音符、音高與節奏數字指令而非波形。',
+                previewType: 'mid_preview',
+                melody: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]
             },
-
-            // 多元影片檔 (video)
             {
-                id: 'mp4-1',
-                name: '4K宇宙星空影片',
+                id: 'file-12',
+                name: '星空短片',
                 ext: '.mp4',
                 category: 'video',
-                size: '52 MB',
                 icon: 'fa-file-video',
-                color: 'text-lime-600',
-                previewType: 'video_mp4',
-                software: 'VLC Media Player, QuickTime, 現代瀏覽器',
-                description: 'MPEG-4 Part 14 視訊格式，高壓縮比且畫質優秀，是現今網路影片與影音平台最主流的格式。'
+                color: 'text-rose-500',
+                size: '18.5 MB',
+                filePath: 'data/星空短片.mp4',
+                software: 'VLC, QuickTime, Chrome, Windows Media Player',
+                description: '現代高壓縮影音格式 (H.264/H.265)，網頁影音主流標準。',
+                previewType: 'video_mp4'
             },
             {
-                id: 'avi-1',
-                name: '復古老電影片段',
+                id: 'file-13',
+                name: '復古紀錄片',
                 ext: '.avi',
                 category: 'video',
-                size: '180 MB',
                 icon: 'fa-file-video',
-                color: 'text-rose-600',
-                previewType: 'video_avi',
-                software: 'VLC Player, KMPlayer, PotPlayer',
-                description: '微軟發明的 Audio Video Interleave 容器格式，壓縮率較低但畫質保留完整，檔案較大。'
+                color: 'text-red-600',
+                size: '45.0 MB',
+                filePath: 'data/復古紀錄片.avi',
+                software: 'VLC, Windows Media Player, KMPlayer',
+                description: '微軟早期開發的影音交錯格式，畫質高但檔案體積較大。',
+                previewType: 'video_avi'
             },
             {
-                id: 'wmv-1',
-                name: '媒體串流展示',
+                id: 'file-14',
+                name: '教學錄影',
                 ext: '.wmv',
                 category: 'video',
-                size: '64 MB',
                 icon: 'fa-file-video',
-                color: 'text-fuchsia-600',
-                previewType: 'video_wmv',
-                software: 'Windows Media Player, VLC Player',
-                description: 'Windows Media Video 格式，由微軟專為網路串流與 Windows 平台開發的影片格式。'
+                color: 'text-indigo-500',
+                size: '22.1 MB',
+                filePath: 'data/教學錄影.wmv',
+                software: 'Windows Media Player, VLC',
+                description: 'Windows 串流媒體格式，相容於微軟作業系統。',
+                previewType: 'video_wmv'
             },
             {
-                id: 'mpg-1',
-                name: 'CRT電視測試訊號',
+                id: 'file-15',
+                name: '電視節目範例',
                 ext: '.mpg',
                 category: 'video',
-                size: '42 MB',
                 icon: 'fa-file-video',
-                color: 'text-orange-500',
-                previewType: 'video_mpg',
-                software: 'VLC Player, 傳統影音播放器',
-                description: 'MPEG-1 / MPEG-2 早期數位影片標準（廣泛用於 VCD/DVD），是現代數位影片的鼻祖之一。'
+                color: 'text-amber-600',
+                size: '30.2 MB',
+                filePath: 'data/電視節目範例.mpg',
+                software: 'VLC Media Player, PowerDVD',
+                description: 'MPEG-1/MPEG-2 視訊壓縮格式，常用於早期 VCD/DVD 影片。',
+                previewType: 'video_mpg'
             },
-
-            // 程式與網頁 (code) - 新增 .html, .css
             {
-                id: 'html-1',
-                name: '個人網站首頁',
+                id: 'file-16',
+                name: 'index',
                 ext: '.html',
                 category: 'code',
-                size: '6.2 KB',
                 icon: 'fa-code',
-                color: 'text-orange-500',
+                color: 'text-orange-600',
+                size: '3.8 KB',
+                filePath: 'data/index.html',
+                software: 'Chrome, Edge, VS Code, Sublime Text',
+                description: '超文件標示語言，網頁的主體結構檔案。',
                 previewType: 'code_html',
-                code: `<!DOCTYPE html>\n<html>\n<head>\n  <title>我的第一個網頁</title>\n</head>\n<body>\n  <h1>Hello, World!</h1>\n  <p>這是一個 HTML 網頁文件！</p>\n</body>\n</html>`,
-                software: 'Google Chrome, Microsoft Edge, VS Code',
-                description: '超文本標記語言（HyperText Markup Language），定義網頁的結構與文字內容，是全球所有網站的骨幹格式！'
+                code: '<!DOCTYPE html>\n<html>\n<head>\n  <title>我的第一個網頁</title>\n</head>\n<body>\n  <h1>歡迎來到副檔名學習網！</h1>\n  <p>點選檔案可查看詳細預覽與說明。</p>\n</body>\n</html>'
             },
             {
-                id: 'css-1',
-                name: '網站美化樣式檔',
+                id: 'file-17',
+                name: 'style',
                 ext: '.css',
                 category: 'code',
-                size: '4.1 KB',
                 icon: 'fa-hashtag',
                 color: 'text-blue-500',
+                size: '2.1 KB',
+                filePath: 'data/style.css',
+                software: 'VS Code, Notepad++, Sublime Text',
+                description: '階層式樣式表，用於設計 HTML 網頁的外觀、顏色、字型與排版。',
                 previewType: 'code_css',
-                code: `/* 網頁主題美化樣式表 */\nbody {\n  background-color: #f8fafc;\n  font-family: 'Inter', sans-serif;\n}\nh1 {\n  color: #4f46e5;\n  text-align: center;\n}`,
-                software: 'VS Code, Sublime Text, 瀏覽器開發者工具',
-                description: '階層式樣式表（Cascading Style Sheets），用來設定 HTML 網頁的外觀、顏色、字體與排版版型。'
+                code: '/* 網頁樣式設定 */\nbody {\n  font-family: "Inter", sans-serif;\n  background-color: #f8fafc;\n  color: #1e293b;\n}\n.button {\n  background: #4f46e5;\n  color: #ffffff;\n  padding: 8px 16px;\n  border-radius: 8px;\n}'
             },
             {
-                id: 'py-1',
-                name: '自動化爬蟲程式',
+                id: 'file-18',
+                name: 'calculate',
                 ext: '.py',
                 category: 'code',
-                size: '4 KB',
-                icon: 'fa-file-code',
-                color: 'text-sky-500',
-                previewType: 'code_editor',
-                code: `# Python 檔案類別識別腳本\ndef check_file_type(filename):\n    ext = filename.split('.')[-1]\n    print(f"檔案 {filename} 的副檔名為: .{ext}")\n\ncheck_file_type("index.html")\ncheck_file_type("style.css")`,
+                icon: 'fa-cube',
+                color: 'text-yellow-600',
+                size: '1.5 KB',
+                filePath: 'data/calculate.py',
                 software: 'Python IDLE, VS Code, PyCharm',
-                description: 'Python 程式碼檔案，需透過 Python Interpreter 執行的自動化腳本或人工智慧程式。'
+                description: 'Python 程式語言腳本檔，簡潔易讀，常用於數據分析與AI開發。',
+                previewType: 'code_py',
+                code: '# 計算學生成績平均與副檔名配對邏輯\ndef calculate_score(scores):\n    total = sum(scores)\n    avg = total / len(scores)\n    print(f"總分: {total}, 平均: {avg:.1f}")\n    return avg\n\ncalculate_score([88, 92, 95])'
             },
-
-            // 壓縮檔 (archive)
             {
-                id: 'zip-1',
-                name: '作業備份壓縮包',
+                id: 'file-19',
+                name: '作業成果打包',
                 ext: '.zip',
                 category: 'archive',
-                size: '12 MB',
                 icon: 'fa-file-zipper',
                 color: 'text-cyan-600',
-                previewType: 'archive_tree',
+                size: '2.4 MB',
+                filePath: 'data/作業成果打包.zip',
+                software: 'WinRAR, 7-Zip, 檔案總管',
+                description: '壓縮檔案格式，可將多個檔案壓縮封裝為單一檔案，減少儲存空間。',
+                previewType: 'zip_preview',
                 tree: [
-                    '📁 練習資料夾/ (test_files)',
-                    '├── 📄 index.html (網頁骨幹檔)',
-                    '├── 🎨 style.css (網頁美化檔)',
-                    '├── 📊 test.ods (開放試算表)',
-                    '├── 🖼️ test.gif (動態圖檔)',
-                    '└── 🎬 test.mp4 (4K影片)'
-                ],
-                software: '7-Zip, WinRAR, Windows 內建解壓縮',
-                description: '數據壓縮歸檔格式，可將多個檔案打成包壓縮成單一檔案，便於網路傳輸與歸檔儲存。'
+                    '📁 作業成果打包.zip',
+                    ' ├── 📄 專案報告.docx',
+                    ' ├── 📊 數據統計.ods',
+                    ' ├── 🖼️ 成果截圖.png',
+                    ' └── 📁 src/',
+                    '      ├── 🌐 index.html',
+                    '      └── 🎨 style.css'
+                ]
             }
         ];
 
@@ -608,6 +613,7 @@
         let quizQuestions = [];
         let quizScore = 0;
         let draggedExtension = null;
+        let isAnswering = false;
 
         function escapeHtml(str) {
             if (typeof str !== 'string') return str;
@@ -726,7 +732,7 @@
         function startQuiz() {
             currentQuizIndex = 0;
             quizScore = 0;
-            // Pick 5 random unique questions from dataset
+            isAnswering = false;
             const shuffled = [...filesData].sort(() => 0.5 - Math.random());
             quizQuestions = shuffled.slice(0, 5);
 
@@ -745,22 +751,24 @@
                 return;
             }
 
+            isAnswering = false;
             const q = quizQuestions[currentQuizIndex];
             document.getElementById('quizCurrentIndex').textContent = currentQuizIndex + 1;
             document.getElementById('quizTotalCount').textContent = quizQuestions.length;
 
-            // Reset drop zone state
             const dropZone = document.getElementById('dropZone');
             dropZone.className = 'border-2 border-dashed border-slate-300 bg-slate-50 p-5 rounded-2xl text-center space-y-3 transition-all duration-200 min-h-[160px] flex flex-col justify-center items-center shadow-inner relative';
-
-            const questionBody = document.getElementById('quizQuestionBody');
-            questionBody.innerHTML = `
-                <div class="text-3xl mb-1"><i class="fa-solid ${q.icon} ${q.color}"></i></div>
-                <div class="font-bold text-slate-800 text-base">${q.name}</div>
-                <p class="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">${q.description}</p>
+            dropZone.innerHTML = `
+                <div id="quizQuestionBody" class="space-y-2 text-center w-full">
+                    <div class="text-3xl mb-1"><i class="fa-solid ${q.icon} ${q.color}"></i></div>
+                    <div class="font-bold text-slate-800 text-base">${q.name}</div>
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">${q.description}</p>
+                </div>
+                <div id="dropPrompt" class="text-xs text-indigo-500 font-semibold bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-200 animate-pulse mt-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-down"></i> 將下方正確的副檔名拖曳至此處
+                </div>
             `;
 
-            // Prepare distractors
             const allExts = [...new Set(filesData.map(f => f.ext))];
             const distractors = allExts.filter(e => e !== q.ext).sort(() => 0.5 - Math.random()).slice(0, 3);
             const options = [q.ext, ...distractors].sort(() => 0.5 - Math.random());
@@ -778,7 +786,6 @@
             `).join('');
         }
 
-        // Drag & Drop Handlers
         function handleDragStart(e, ext) {
             draggedExtension = ext;
             e.dataTransfer.setData('text/plain', ext);
@@ -789,18 +796,18 @@
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
             const dropZone = document.getElementById('dropZone');
-            dropZone.classList.add('drop-zone-active');
+            if (dropZone) dropZone.classList.add('drop-zone-active');
         }
 
         function handleDragLeave(e) {
             const dropZone = document.getElementById('dropZone');
-            dropZone.classList.remove('drop-zone-active');
+            if (dropZone) dropZone.classList.remove('drop-zone-active');
         }
 
         function handleDrop(e) {
             e.preventDefault();
             const dropZone = document.getElementById('dropZone');
-            dropZone.classList.remove('drop-zone-active');
+            if (dropZone) dropZone.classList.remove('drop-zone-active');
 
             const ext = e.dataTransfer.getData('text/plain') || draggedExtension;
             if (!ext) return;
@@ -809,17 +816,19 @@
             verifyQuizAnswer(ext, q.ext);
         }
 
-        // Touch/Click fallback for touchscreens
         function handleMobileTapBadge(selectedExt, correctExt) {
             verifyQuizAnswer(selectedExt, correctExt);
         }
 
         function verifyQuizAnswer(selected, correct) {
+            if (isAnswering) return;
+            isAnswering = true;
+
             const dropZone = document.getElementById('dropZone');
             const currentQ = quizQuestions[currentQuizIndex];
 
             if (selected === correct) {
-                dropZone.classList.add('drop-zone-success');
+                dropZone.className = 'border-2 border-solid border-emerald-400 bg-emerald-50 p-5 rounded-2xl text-center space-y-3 transition-all duration-200 min-h-[160px] flex flex-col justify-center items-center shadow-inner relative drop-zone-success';
                 dropZone.innerHTML = `
                     <div class="text-emerald-600 space-y-1">
                         <i class="fa-solid fa-circle-check text-4xl animate-bounce"></i>
@@ -830,7 +839,7 @@
                 quizScore += 20;
                 document.getElementById('quizScore').textContent = quizScore;
             } else {
-                dropZone.classList.add('drop-zone-error');
+                dropZone.className = 'border-2 border-solid border-rose-400 bg-rose-50 p-5 rounded-2xl text-center space-y-3 transition-all duration-200 min-h-[160px] flex flex-col justify-center items-center shadow-inner relative drop-zone-error';
                 dropZone.innerHTML = `
                     <div class="text-rose-600 space-y-1">
                         <i class="fa-solid fa-circle-xmark text-4xl animate-pulse"></i>
@@ -865,215 +874,216 @@
             const file = filesData.find(f => f.id === fileId);
             if (!file) return;
 
-            // Stop active playback
             stopAudio();
             stopVideoAnim();
 
-            // Setup Meta
             document.getElementById('modalFileName').textContent = `${file.name}${file.ext}`;
             document.getElementById('modalFileIcon').className = `fa-solid ${file.icon} ${file.color}`;
             document.getElementById('modalExtText').textContent = file.ext;
             document.getElementById('modalCategoryText').textContent = getCategoryLabel(file.category);
-            document.getElementById('modalSizeText').textContent = file.size;
+            document.getElementById('modalFilePathText').textContent = file.filePath;
             document.getElementById('modalSoftwareText').textContent = file.software;
             document.getElementById('modalDescriptionText').textContent = file.description;
+
+            const dlBtn = document.getElementById('modalDownloadBtn');
+            if (dlBtn) {
+                dlBtn.href = file.filePath;
+                dlBtn.setAttribute('download', `${file.name}${file.ext}`);
+            }
 
             const container = document.getElementById('previewViewerContainer');
             container.innerHTML = '';
 
             switch(file.previewType) {
-                // PowerPoint Preview
+                case 'doc_preview':
+                    container.innerHTML = `
+                        <div class="w-full max-w-md bg-white text-slate-800 p-6 rounded-lg shadow-lg text-left space-y-3 border border-slate-200">
+                            <div class="border-b pb-2">
+                                <h3 class="font-bold text-slate-900 text-base">${file.content.title}</h3>
+                                <p class="text-[11px] text-slate-400 font-mono mt-0.5">${file.content.subtitle}</p>
+                            </div>
+                            <p class="text-xs text-slate-600 whitespace-pre-line leading-relaxed">${file.content.body}</p>
+                        </div>`;
+                    break;
+
                 case 'pptx_preview':
                     let slidesHtml = `
                         <div class="w-full max-w-lg space-y-3">
                             <div id="pptxSlideDisplay" class="w-full aspect-video rounded-xl shadow-2xl p-6 text-white flex flex-col justify-between bg-gradient-to-br ${file.slides[0].bg} transition-all duration-300 relative overflow-hidden">
                                 <div class="text-xs font-mono opacity-80 flex justify-between">
-                                    <span><i class="fa-solid fa-file-powerpoint"></i> PPTX 簡報放映</span>
-                                    <span id="pptxNum">Slide 1 / 3</span>
+                                    <span><i class="fa-solid fa-file-powerpoint"></i> PPTX 簡報 (.pptx)</span>
+                                    <span id="pptxNum">Slide 1 / ${file.slides.length}</span>
                                 </div>
                                 <div>
                                     <h2 id="pptxTitle" class="text-xl font-bold mb-2">${file.slides[0].title}</h2>
                                     <p id="pptxSub" class="text-xs opacity-90">${file.slides[0].subtitle}</p>
                                 </div>
-                                <div class="text-[10px] text-right opacity-60">點擊下方切換投影片</div>
+                                <div class="text-[10px] text-right opacity-60">data/簡報發表檔.pptx 已就緒</div>
                             </div>
                             <div class="flex justify-center gap-2">
-                    `;
-                    file.slides.forEach((s, i) => {
-                        slidesHtml += `<button onclick="switchSlide('${file.id}', ${i})" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg border border-slate-700">頁面 ${i+1}</button>`;
-                    });
-                    slidesHtml += `</div></div>`;
+                                ${file.slides.map((s, idx) => `
+                                    <button onclick="switchSlide('${file.id}', ${idx})" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-md border border-slate-700 font-mono">
+                                        頁 ${idx + 1}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>`;
                     container.innerHTML = slidesHtml;
                     break;
 
-                // OpenDocument Spreadsheet
                 case 'ods_preview':
                     let odsHtml = `
                         <div class="w-full overflow-x-auto">
                             <div class="text-xs font-mono text-emerald-400 mb-2 flex items-center gap-2">
-                                <i class="fa-solid fa-file-excel"></i> LibreOffice Calc (.ods) 開放試算表檢視器
+                                <i class="fa-solid fa-file-excel"></i> LibreOffice Calc (.ods) 開放試算表
                             </div>
-                            <table class="w-full text-xs text-left text-slate-200 border-collapse border border-slate-800">
-                    `;
+                            <table class="w-full text-xs text-left text-slate-200 border-collapse border border-slate-800 bg-slate-950 rounded-lg overflow-hidden">`;
                     file.content.forEach((row, rowIndex) => {
-                        odsHtml += `<tr class="${rowIndex === 0 ? 'bg-emerald-950 font-bold text-emerald-200 border-b-2 border-emerald-600' : 'border-b border-slate-800 hover:bg-slate-800/60'}">`;
-                        row.forEach(cell => {
-                            odsHtml += `<td class="px-3 py-2 border-r border-slate-800 font-mono">${cell}</td>`;
-                        });
+                        odsHtml += `<tr class="${rowIndex === 0 ? 'bg-emerald-900 font-bold text-emerald-200 border-b border-emerald-700' : 'border-b border-slate-800'}">`;
+                        row.forEach(cell => { odsHtml += `<td class="px-3 py-2 border-r border-slate-800 font-mono">${cell}</td>`; });
                         odsHtml += '</tr>';
                     });
                     odsHtml += '</table></div>';
                     container.innerHTML = odsHtml;
                     break;
 
-                // HTML Code Preview
-                case 'code_html':
+                case 'csv_preview':
+                    let csvHtml = `
+                        <div class="w-full overflow-x-auto">
+                            <div class="text-xs font-mono text-teal-400 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-file-csv"></i> CSV 純文字逗點分隔檔案
+                            </div>
+                            <table class="w-full text-xs text-left text-slate-200 border-collapse border border-slate-800 bg-slate-950 rounded-lg overflow-hidden">`;
+                    file.csvRows.forEach((row, rowIndex) => {
+                        csvHtml += `<tr class="${rowIndex === 0 ? 'bg-teal-900 font-bold text-teal-200 border-b border-teal-700' : 'border-b border-slate-800'}">`;
+                        row.forEach(cell => { csvHtml += `<td class="px-3 py-2 border-r border-slate-800 font-mono">${cell}</td>`; });
+                        csvHtml += '</tr>';
+                    });
+                    csvHtml += '</table></div>';
+                    container.innerHTML = csvHtml;
+                    break;
+
+                case 'pdf_preview':
                     container.innerHTML = `
-                        <div class="w-full text-left space-y-3">
-                            <div class="flex items-center justify-between text-xs text-orange-400 font-mono border-b border-slate-800 pb-2">
-                                <span><i class="fa-solid fa-code"></i> HTML5 超文本網頁骨幹</span>
-                                <span class="text-[10px] bg-orange-950 text-orange-300 px-2 py-0.5 rounded">Rendered Preview</span>
+                        <div class="w-full max-w-md bg-white rounded-lg p-5 text-slate-800 shadow-xl space-y-3 border border-slate-200">
+                            <div class="flex justify-between items-center border-b pb-2 text-xs text-slate-500 font-mono">
+                                <span><i class="fa-solid fa-file-pdf text-red-500"></i> ${file.content.title}</span>
+                                <span>${file.content.pages}</span>
                             </div>
-                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 whitespace-pre overflow-x-auto mb-2">${escapeHtml(file.code)}</div>
-                            <div class="p-3 bg-white text-slate-900 rounded-lg shadow border border-slate-300 text-center">
-                                <h1 class="text-base font-bold text-indigo-700">Hello, World!</h1>
-                                <p class="text-xs text-slate-600 mt-0.5">這是一個由 HTML 渲染呈現的網頁內容！</p>
-                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed font-sans">${file.content.text}</p>
                         </div>
                     `;
                     break;
 
-                // CSS Code Preview
-                case 'code_css':
+                case 'txt_preview':
                     container.innerHTML = `
-                        <div class="w-full text-left space-y-3">
-                            <div class="flex items-center justify-between text-xs text-blue-400 font-mono border-b border-slate-800 pb-2">
-                                <span><i class="fa-solid fa-hashtag"></i> CSS3 階層樣式美化檔</span>
-                            </div>
-                            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-blue-300 whitespace-pre overflow-x-auto">${escapeHtml(file.code)}</div>
+                        <div class="w-full text-left font-mono text-xs text-slate-200 bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2 whitespace-pre-wrap">
+                            <div class="text-[10px] text-slate-500 border-b border-slate-800 pb-1">純文字內容 (${file.filePath}):</div>
+                            <div>${escapeHtml(file.text)}</div>
                         </div>
                     `;
                     break;
 
-                // High Quality JPG Photo Preview
-                case 'image_jpg':
+                case 'jpg_preview':
                     container.innerHTML = `
-                        <div class="flex flex-col items-center space-y-3 w-full">
-                            <div class="relative group max-w-md w-full h-48 rounded-xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-950 flex items-center justify-center">
-                                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80');"></div>
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent opacity-60"></div>
-                                <div class="absolute bottom-3 left-3 text-left">
-                                    <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">JPG 相片</span>
-                                    <p class="text-xs font-semibold text-white mt-1">高畫質真實風景相片 (8K JPEG)</p>
+                        <div class="flex flex-col items-center justify-center space-y-2 w-full">
+                            <div class="relative w-64 h-40 rounded-xl overflow-hidden shadow-2xl border border-slate-700 bg-gradient-to-tr from-amber-600 via-orange-500 to-yellow-400 flex items-center justify-center">
+                                <svg class="w-full h-full opacity-40" viewBox="0 0 200 120" preserveAspectRatio="none">
+                                    <path d="M0 120 L60 50 L120 100 L160 30 L200 120 Z" fill="#ffffff" />
+                                </svg>
+                                <span class="absolute font-bold text-white text-shadow text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-sun text-yellow-300"></i> 高畫質相片 (.jpg)
+                                </span>
+                            </div>
+                            <span class="text-[11px] text-slate-400 font-mono">色彩豐富 / 適合自然風景與攝影照</span>
+                        </div>
+                    `;
+                    break;
+
+                case 'png_preview':
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center space-y-2 w-full">
+                            <div class="w-64 h-40 rounded-xl bg-checkerboard flex items-center justify-center shadow-2xl border border-slate-700 relative">
+                                <div class="px-4 py-2 bg-emerald-600/90 text-white rounded-lg font-bold text-xs shadow-lg flex items-center gap-2 border border-emerald-400">
+                                    <i class="fa-solid fa-shapes text-emerald-200"></i> Alpha 透明圖層 (.png)
                                 </div>
                             </div>
-                            <span class="text-[11px] text-slate-400 font-mono">解析度: 3840 x 2160 | 色彩空間: sRGB</span>
+                            <span class="text-[11px] text-slate-400 font-mono">透明背景 / 無損壓縮 Icon 標誌</span>
                         </div>
                     `;
                     break;
 
-                // PNG Transparent Graphic Preview
-                case 'image_png':
+                case 'gif_preview':
                     container.innerHTML = `
-                        <div class="flex flex-col items-center space-y-3 w-full">
-                            <div class="w-64 h-44 rounded-xl shadow-2xl flex items-center justify-center relative overflow-hidden border border-slate-700" 
-                                style="background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px;">
-                                <div class="p-4 bg-amber-500/20 rounded-full border border-amber-400/30 backdrop-blur-md flex flex-col items-center animate-bounce">
-                                    <i class="fa-solid fa-crown text-4xl text-amber-400 drop-shadow-lg"></i>
-                                </div>
-                            </div>
-                            <span class="text-[11px] text-amber-400 font-mono"><i class="fa-solid fa-border-none"></i> 支援透明 Alpha 背景通道 (.PNG)</span>
+                        <div class="flex flex-col items-center space-y-2">
+                            <canvas id="gifCanvas" width="280" height="160" class="rounded-xl border border-slate-700 bg-slate-950 shadow-2xl"></canvas>
+                            <span class="text-[11px] text-slate-400 font-mono">連續幀動畫 / 畫素像素風循環</span>
                         </div>
                     `;
+                    setTimeout(startGifAnim, 50);
                     break;
 
-                // Animated GIF Simulator Preview
-                case 'image_gif':
-                    container.innerHTML = `
-                        <div class="flex flex-col items-center space-y-3 w-full">
-                            <canvas id="gifCanvas" width="280" height="160" class="rounded-xl shadow-2xl border border-slate-700 bg-slate-950"></canvas>
-                            <span class="text-[11px] text-purple-400 font-mono flex items-center gap-1.5">
-                                <i class="fa-solid fa-rotate text-xs animate-spin"></i> 動態 GIF 逐格動畫循環播放中 (12 FPS)
-                            </span>
-                        </div>
-                    `;
-                    startGifAnim();
-                    break;
-
-                // Audio MP3 Player
-                case 'audio_mp3':
+                case 'mp3_preview':
                     container.innerHTML = `
                         <div class="flex flex-col items-center space-y-4 w-full max-w-xs">
                             <div class="w-20 h-20 bg-sky-500/20 text-sky-400 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-sky-500/30">
                                 <i class="fa-solid fa-compact-disc animate-spin" style="animation-duration: 4s;"></i>
                             </div>
                             <div class="text-center">
-                                <h4 class="text-xs font-bold text-slate-200">流行立體聲音樂 (.MP3)</h4>
-                                <p class="text-[10px] text-slate-400 mt-0.5">位元率: 320 kbps | 44.1 kHz</p>
+                                <h4 class="text-xs font-bold text-slate-200">高音質鋼琴和絃音效 (.mp3)</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5">${file.filePath}</p>
                             </div>
-                            <button onclick="playChordAudio('${file.id}')" id="playAudioBtn" class="px-6 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-full shadow-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-play"></i> 播放 MP3 鋼琴和絃音效
+                            <button onclick="playChordAudio('${file.id}')" id="playAudioBtn" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-full shadow-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> 試聽合成立體聲和絃
                             </button>
                         </div>
                     `;
                     break;
 
-                // Audio MIDI Synthesizer Player
-                case 'audio_midi':
+                case 'mid_preview':
                     container.innerHTML = `
                         <div class="flex flex-col items-center space-y-4 w-full max-w-xs">
-                            <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-emerald-500/30">
+                            <div class="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-purple-500/30">
                                 <i class="fa-solid fa-sliders"></i>
                             </div>
                             <div class="text-center">
-                                <h4 class="text-xs font-bold text-slate-200">MIDI 音樂軌道指令 (.MID)</h4>
-                                <p class="text-[10px] text-emerald-400 font-mono mt-0.5">8 通道電子合成器樂譜</p>
+                                <h4 class="text-xs font-bold text-slate-200">MIDI 八音階音樂軌道 (.mid)</h4>
+                                <p class="text-[10px] text-purple-300 font-mono mt-0.5">數位音符指令集</p>
                             </div>
-                            <button onclick="playMidiMelody('${file.id}')" id="playMidiBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-full shadow-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> 演奏 Do-Re-Mi 旋律
+                            <button onclick="playMidiMelody('${file.id}')" id="playMidiBtn" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-full shadow-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> 演奏 Do-Re-Mi 合成旋律
                             </button>
                         </div>
                     `;
                     break;
 
-                // Rich Diverse Video Simulators
                 case 'video_mp4':
                 case 'video_avi':
                 case 'video_wmv':
                 case 'video_mpg':
                     container.innerHTML = `
                         <div class="flex flex-col items-center space-y-2 w-full">
-                            <canvas id="videoCanvas" width="360" height="200" class="rounded-xl shadow-2xl border border-slate-700 bg-black"></canvas>
-                            <div id="videoBadge" class="text-[11px] font-mono text-slate-400 flex items-center gap-2"></div>
+                            <div class="text-xs text-slate-300 font-mono flex items-center gap-2" id="videoBadge">
+                                影音動態播放器
+                            </div>
+                            <canvas id="videoCanvas" width="360" height="180" class="rounded-xl border border-slate-700 bg-black shadow-2xl"></canvas>
                         </div>
                     `;
-                    startVideoAnim(file.previewType);
+                    setTimeout(() => startVideoAnim(file.previewType), 50);
                     break;
 
-                // Standard Text / Code / PDF / CSV / Archive Fallbacks
-                case 'text':
-                    container.innerHTML = `<div class="w-full text-left font-mono text-xs text-slate-200 bg-slate-950 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap border border-slate-800">${escapeHtml(file.content)}</div>`;
+                case 'code_html':
+                case 'code_css':
+                case 'code_py':
+                    container.innerHTML = `
+                        <div class="w-full text-left font-mono text-xs text-amber-300 bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2 overflow-x-auto">
+                            <div class="text-[10px] text-slate-500 border-b border-slate-800 pb-1">原始碼內容 (${file.ext}):</div>
+                            <pre>${escapeHtml(file.code)}</pre>
+                        </div>
+                    `;
                     break;
-                case 'doc_preview':
-                    container.innerHTML = `<div class="w-full max-w-md bg-white text-slate-800 p-6 rounded-lg shadow-lg text-left space-y-3"><div class="border-b pb-2"><h3 class="font-bold text-slate-900 text-base">${file.content.title}</h3><p class="text-[11px] text-slate-400">${file.content.subtitle}</p></div><p class="text-xs text-slate-600 whitespace-pre-line leading-relaxed">${file.content.body}</p></div>`;
-                    break;
-                case 'pdf_preview':
-                    container.innerHTML = `<div class="w-full max-w-md bg-slate-800 text-slate-100 p-6 rounded-lg border border-slate-700 text-center space-y-4"><div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-2xl"><i class="fa-solid fa-file-pdf"></i></div><div><h3 class="font-bold text-sm">${file.content.title}</h3><p class="text-xs text-rose-400 mt-1">${file.content.status}</p></div><div class="text-[11px] text-slate-400 bg-slate-900 py-1.5 px-3 rounded-full inline-block">${file.content.pageCount}</div></div>`;
-                    break;
-                case 'csv_table':
-                    let tableHtml = '<div class="w-full overflow-x-auto"><table class="w-full text-xs text-left text-slate-200 border-collapse">';
-                    file.content.forEach((row, rowIndex) => {
-                        tableHtml += `<tr class="${rowIndex === 0 ? 'bg-indigo-900/60 font-bold text-indigo-200' : 'border-t border-slate-800 hover:bg-slate-800/50'}">`;
-                        row.forEach(cell => { tableHtml += `<td class="px-3 py-2 border-r border-slate-800">${cell}</td>`; });
-                        tableHtml += '</tr>';
-                    });
-                    tableHtml += '</table></div>';
-                    container.innerHTML = tableHtml;
-                    break;
-                case 'code_editor':
-                    container.innerHTML = `<div class="w-full text-left font-mono text-xs text-emerald-400 bg-slate-950 p-4 rounded-lg overflow-x-auto whitespace-pre border border-slate-800">${escapeHtml(file.code)}</div>`;
-                    break;
-                case 'archive_tree':
+
+                case 'zip_preview':
                     let treeHtml = '<div class="w-full text-left font-mono text-xs text-cyan-300 bg-slate-950 p-4 rounded-lg space-y-1 border border-slate-800">';
                     file.tree.forEach(line => { treeHtml += `<div>${line}</div>`; });
                     treeHtml += '</div>';
@@ -1081,15 +1091,16 @@
                     break;
             }
 
-            // Show modal
             const modal = document.getElementById('previewModal');
             const modalBox = document.getElementById('modalBox');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalBox.classList.remove('scale-95');
-                modalBox.classList.add('scale-100');
-            }, 10);
+            if (modal && modalBox) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modalBox.classList.remove('scale-95');
+                    modalBox.classList.add('scale-100');
+                }, 10);
+            }
         }
 
         function switchSlide(fileId, idx) {
@@ -1121,26 +1132,22 @@
                 ctx.fillStyle = '#0f172a';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Animated Pixel Art Cat Bouncing
                 const offsetY = Math.sin(frame * 0.1) * 12;
 
                 ctx.fillStyle = '#a855f7';
-                ctx.fillRect(110, 60 + offsetY, 60, 50); // body
-                ctx.fillRect(120, 40 + offsetY, 40, 30); // head
+                ctx.fillRect(110, 50 + offsetY, 60, 50);
+                ctx.fillRect(120, 30 + offsetY, 40, 30);
 
-                // ears
-                ctx.fillRect(115, 30 + offsetY, 10, 15);
-                ctx.fillRect(155, 30 + offsetY, 10, 15);
+                ctx.fillRect(115, 20 + offsetY, 10, 15);
+                ctx.fillRect(155, 20 + offsetY, 10, 15);
 
-                // eyes (blink)
                 ctx.fillStyle = (frame % 30 < 5) ? '#a855f7' : '#ffffff';
-                ctx.fillRect(128, 48 + offsetY, 6, 6);
-                ctx.fillRect(146, 48 + offsetY, 6, 6);
+                ctx.fillRect(128, 38 + offsetY, 6, 6);
+                ctx.fillRect(146, 38 + offsetY, 6, 6);
 
-                // frame counter label
                 ctx.fillStyle = '#e2e8f0';
                 ctx.font = '10px monospace';
-                ctx.fillText(`FRAME: ${frame % 24 + 1} / 24 [GIF Loop]`, 10, 150);
+                ctx.fillText(`FRAME: ${frame % 24 + 1} / 24 [GIF Loop]`, 10, 145);
 
                 gifAnimFrame = requestAnimationFrame(draw);
             }
@@ -1170,7 +1177,7 @@
 
                 const btn = document.getElementById('playAudioBtn');
                 if (btn) btn.innerHTML = '<i class="fa-solid fa-volume-high text-amber-300"></i> 正在播放立體聲...';
-                setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> 播放 MP3 鋼琴和絃音效'; }, 1800);
+                setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> 試聽合成立體聲和絃'; }, 1800);
             } catch(e){}
         }
 
@@ -1198,7 +1205,7 @@
                     activeAudioOscs.push(osc);
                 });
 
-                setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 演奏 Do-Re-Mi 旋律'; }, file.melody.length * 250 + 200);
+                setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 演奏 Do-Re-Mi 合成旋律'; }, file.melody.length * 250 + 200);
             } catch(e){}
         }
 
@@ -1232,16 +1239,16 @@
                         }
 
                         const px = 180 + Math.cos(frame * 0.03) * 100;
-                        const py = 100 + Math.sin(frame * 0.03) * 40;
+                        const py = 90 + Math.sin(frame * 0.03) * 40;
                         
-                        const grad = ctx.createRadialGradient(180, 100, 5, 180, 100, 60);
+                        const grad = ctx.createRadialGradient(180, 90, 5, 180, 90, 60);
                         grad.addColorStop(0, '#f59e0b');
                         grad.addColorStop(1, 'transparent');
                         ctx.fillStyle = grad;
-                        ctx.beginPath(); ctx.arc(180, 100, 60, 0, Math.PI*2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(180, 90, 60, 0, Math.PI*2); ctx.fill();
 
                         ctx.beginPath();
-                        ctx.arc(px, py, 14, 0, Math.PI * 2);
+                        ctx.arc(px, py, 12, 0, Math.PI * 2);
                         ctx.fillStyle = '#38bdf8';
                         ctx.fill();
                         break;
@@ -1260,17 +1267,17 @@
 
                         ctx.strokeStyle = '#d6d3d1';
                         ctx.lineWidth = 3;
-                        ctx.beginPath(); ctx.arc(180, 100, 50, 0, Math.PI*2); ctx.stroke();
-                        ctx.beginPath(); ctx.arc(180, 100, 40, 0, Math.PI*2); ctx.stroke();
+                        ctx.beginPath(); ctx.arc(180, 90, 50, 0, Math.PI*2); ctx.stroke();
+                        ctx.beginPath(); ctx.arc(180, 90, 40, 0, Math.PI*2); ctx.stroke();
 
-                        ctx.beginPath(); ctx.moveTo(180, 30); ctx.lineTo(180, 170); ctx.stroke();
-                        ctx.beginPath(); ctx.moveTo(110, 100); ctx.lineTo(250, 100); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(180, 20); ctx.lineTo(180, 160); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(110, 90); ctx.lineTo(250, 90); ctx.stroke();
 
                         const num = 5 - (Math.floor(frame / 30) % 5);
                         ctx.fillStyle = '#f5f5f4';
                         ctx.font = 'bold 36px serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(num, 180, 112);
+                        ctx.fillText(num, 180, 102);
                         ctx.textAlign = 'start';
                         break;
 
@@ -1282,7 +1289,7 @@
                         const bars = 20;
                         const barWidth = canvas.width / bars;
                         for(let i = 0; i < bars; i++) {
-                            const h = Math.abs(Math.sin(frame * 0.08 + i * 0.4)) * 140 + 10;
+                            const h = Math.abs(Math.sin(frame * 0.08 + i * 0.4)) * 130 + 10;
                             ctx.fillStyle = `hsl(${i * 15 + frame}, 80%, 60%)`;
                             ctx.fillRect(i * barWidth + 2, canvas.height - h, barWidth - 4, h);
                         }
@@ -1322,7 +1329,6 @@
             }
         }
 
-        // Initialize application
         window.onload = function() {
             renderFiles();
         };
